@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0D0D0D">
+  <meta name="description" content="Hamba: shop South African brands and makers, vote on new designs, and run safe.">
+  <title>Hamba</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <script>
+    // Web fonts load only when low-data mode is off.
+    (function () {
+      var low = false;
+      try { low = localStorage.getItem('hamba.lowData') === '1'; } catch (e) { /* private mode */ }
+      if (low) { document.documentElement.className += ' low-data'; return; }
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,700..900&family=Inter:wght@400;500;600;700&display=swap';
+      document.head.appendChild(link);
+    })();
+  </script>
+  <!-- version:start (written by tools/stamp.mjs) -->
+  <link rel="stylesheet" href="src/theme/tokens.css?v=a12643ff73">
+  <link rel="stylesheet" href="src/app.css?v=6cf46891f7">
+  <script type="importmap">
+  {
+    "imports": {
+      "./src/app.js": "./src/app.js?v=09c3a354bc",
+      "./src/auth/api.js": "./src/auth/api.js?v=11066a7019",
+      "./src/auth/client.js": "./src/auth/client.js?v=e919fd1a7c",
+      "./src/auth/demo.js": "./src/auth/demo.js?v=fdafb9d98d",
+      "./src/auth/errors.js": "./src/auth/errors.js?v=d7a3af2e65",
+      "./src/auth/validate.js": "./src/auth/validate.js?v=463c0e5b1f",
+      "./src/config.js": "./src/config.js?v=37f55d28bd",
+      "./src/dom.js": "./src/dom.js?v=199b76cb93",
+      "./src/market/api.js": "./src/market/api.js?v=9ced7deee2",
+      "./src/market/bag.js": "./src/market/bag.js?v=bcd98d03ee",
+      "./src/market/catalog.js": "./src/market/catalog.js?v=4cd3239cb9",
+      "./src/market/money.js": "./src/market/money.js?v=9b1d8221a8",
+      "./src/market/photos.js": "./src/market/photos.js?v=d1a71d5086",
+      "./src/market/seed.js": "./src/market/seed.js?v=156a74316e",
+      "./src/market/ui.js": "./src/market/ui.js?v=ae6bb054fa",
+      "./src/market/validate.js": "./src/market/validate.js?v=80de6780e0",
+      "./src/next.js": "./src/next.js?v=839f4a7376",
+      "./src/router.js": "./src/router.js?v=cade4f14ac",
+      "./src/screens/admin.js": "./src/screens/admin.js?v=dcd6b99e20",
+      "./src/screens/bag.js": "./src/screens/bag.js?v=65f4bab992",
+      "./src/screens/checkout.js": "./src/screens/checkout.js?v=8c46ba255c",
+      "./src/screens/forgot.js": "./src/screens/forgot.js?v=4dbfe46698",
+      "./src/screens/home.js": "./src/screens/home.js?v=eb53d4bf5d",
+      "./src/screens/legal.js": "./src/screens/legal.js?v=f8722cffb1",
+      "./src/screens/newpassword.js": "./src/screens/newpassword.js?v=0f4055d807",
+      "./src/screens/product-edit.js": "./src/screens/product-edit.js?v=ffafdf1306",
+      "./src/screens/product.js": "./src/screens/product.js?v=eec8f5132d",
+      "./src/screens/profile.js": "./src/screens/profile.js?v=fd48df2d08",
+      "./src/screens/search.js": "./src/screens/search.js?v=cf8f9e98f0",
+      "./src/screens/sell.js": "./src/screens/sell.js?v=61f5447c65",
+      "./src/screens/signin.js": "./src/screens/signin.js?v=9268d8e514",
+      "./src/screens/signup.js": "./src/screens/signup.js?v=882f7d44fd",
+      "./src/settings.js": "./src/settings.js?v=964e955833",
+      "./src/shell.js": "./src/shell.js?v=09483f223e",
+      "./src/viewer.js": "./src/viewer.js?v=d23dbc790d"
+    }
+  }
+  </script>
+  <!-- version:end -->
+  <script>
+    // If a phone mixed old and new files during an update and the app could
+    // not start, load the page once more. Only once, so a real fault cannot loop.
+    window.addEventListener('error', function (event) {
+      if (window.__hambaStarted) return;
+      var message = String((event && event.message) || '');
+      if (!/SyntaxError|import|export|module/i.test(message)) return;
+      try {
+        if (sessionStorage.getItem('hamba.reloaded')) return;
+        sessionStorage.setItem('hamba.reloaded', '1');
+      } catch (e) { return; }
+      location.reload();
+    });
+  </script>
+</head>
+<body>
+  <main id="app" class="app" tabindex="-1"></main>
+  <noscript>Hamba needs JavaScript to run.</noscript>
+  <script type="module">import './src/app.js';</script>
+</body>
+</html>

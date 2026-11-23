@@ -1,0 +1,11 @@
+{
+  "name": "Hamba",
+  "short_name": "Hamba",
+  "description": "Shop South African brands and makers, vote on new designs, and run safe.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0D0D0D",
+  "theme_color": "#0D0D0D",
+  "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

@@ -1,0 +1,37 @@
+/* Hamba theme: black with hot pink, as in the Hamba screens.
+   Every screen takes its colours from here. */
+:root {
+  --color-ground: #0D0D0D;
+  --color-panel: #000000;
+  --color-surface: #181818;
+  --color-line: #262626;
+  --color-line-strong: #2E2E2E;
+  --color-text: #F5F5F5;
+  --color-text-soft: #D9D9D9;
+  --color-text-muted: #B3B3B3;
+  --color-accent: #FF2E88;        /* buttons and fills, with black text */
+  --color-accent-hover: #FF5CA3;
+  --color-on-accent: #000000;
+  --color-link: #FF2E88;
+  --color-link-hover: #FFFFFF;
+  --color-success-bg: #10291E;
+  --color-success-text: #6EE7A8;
+  --color-danger: #FF8A8A;
+  --color-danger-bg: #3A1414;
+  --color-warning: #FFD166;
+  --color-warning-bg: #3A2E10;
+
+  --font-heading: Archivo, 'Arial Black', system-ui, sans-serif;
+  --font-body: Inter, system-ui, sans-serif;
+
+  --radius-control: 14px;
+  --radius-card: 16px;
+  --touch-target: 44px;
+  color-scheme: dark;
+}
+
+/* Low-data mode: no web fonts, so headings fall back to the phone's own. */
+.low-data {
+  --font-heading: 'Arial Black', system-ui, sans-serif;
+  --font-body: system-ui, sans-serif;
+}

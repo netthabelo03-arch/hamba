@@ -1,0 +1,11 @@
+{
+  "name": "hamba",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Hamba: a South African marketplace for local brands, with Studio and Run safe.",
+  "scripts": {
+    "test": "node --test",
+    "stamp": "node tools/stamp.mjs"
+  }
+}
