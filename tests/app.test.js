@@ -17,7 +17,7 @@ test('each named address opens its screen; anything else goes Home', () => {
 test('marketplace addresses carry their category or product id', () => {
   const cases = {
     '#/search': { screen: 'search' },
-    '#/search/sneakers': { screen: 'search', category: 'sneakers' },
+    '#/search/shoes': { screen: 'search', category: 'shoes' },
     '#/product/p-runner': { screen: 'product', id: 'p-runner' },
     '#/bag': { screen: 'bag' },
     '#/checkout': { screen: 'checkout' },
@@ -26,6 +26,7 @@ test('marketplace addresses carry their category or product id', () => {
     '#/sell/new': { screen: 'sell-new' },
     '#/sell/edit/abc-123': { screen: 'sell-edit', id: 'abc-123' },
     '#/admin': { screen: 'admin' },
+    '#/admin/products': { screen: 'admin-products' },
   };
   for (const [hash, route] of Object.entries(cases)) {
     assert.deepEqual(parseRoute(hash), route, hash);
@@ -35,7 +36,7 @@ test('marketplace addresses carry their category or product id', () => {
 });
 
 test('checkout, selling and admin need an account; browsing and the bag do not', () => {
-  for (const screen of ['checkout', 'sell', 'sell-new', 'sell-edit', 'sell-shop', 'admin']) assert.deepEqual(resolveRoute({ screen }, false), { screen: 'signin' });
+  for (const screen of ['checkout', 'sell', 'sell-new', 'sell-edit', 'sell-shop', 'admin', 'admin-products']) assert.deepEqual(resolveRoute({ screen }, false), { screen: 'signin' });
   for (const screen of ['search', 'product', 'bag']) assert.equal(resolveRoute({ screen }, false).screen, screen);
   assert.equal(hashFor({ screen: 'home' }), '#/');
 });

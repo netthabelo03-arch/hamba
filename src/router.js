@@ -16,7 +16,8 @@
 //   #/sell/shop            edit your shop's details
 //   #/sell/new             add a product
 //   #/sell/edit/<id>       edit a product
-//   #/admin                approve and suspend shops (admins only)
+//   #/admin                check, approve and suspend shops (admins only)
+//   #/admin/products       review new and changed products (admins only)
 //   #/signup #/signin #/forgot #/new-password #/profile #/terms #/privacy
 
 import { isCategory } from './market/catalog.js';
@@ -27,7 +28,7 @@ const SINGLE_SCREENS = ['signup', 'signin', 'forgot', 'new-password', 'profile',
 const ID = /^[\w-]{1,64}$/;
 
 /** Screens that only a signed-in person may open. */
-export const PROTECTED_SCREENS = ['profile', 'new-password', 'checkout', 'sell', 'sell-shop', 'sell-new', 'sell-edit', 'admin'];
+export const PROTECTED_SCREENS = ['profile', 'new-password', 'checkout', 'sell', 'sell-shop', 'sell-new', 'sell-edit', 'admin', 'admin-products'];
 
 /** Screens that make no sense once signed in. */
 export const GUEST_SCREENS = ['signup', 'signin', 'forgot'];
@@ -41,6 +42,7 @@ export function parseRoute(hash) {
   if (parts.length === 2 && first === 'search' && isCategory(second)) return { screen: 'search', category: second };
   if (parts.length === 2 && first === 'product' && ID.test(second)) return { screen: 'product', id: second };
   if (parts.length === 2 && first === 'sell' && second === 'shop') return { screen: 'sell-shop' };
+  if (parts.length === 2 && first === 'admin' && second === 'products') return { screen: 'admin-products' };
   if (parts.length === 2 && first === 'sell' && second === 'new') return { screen: 'sell-new' };
   if (parts.length === 3 && first === 'sell' && second === 'edit' && ID.test(third)) return { screen: 'sell-edit', id: third };
   // Anything unknown falls back to Home instead of a blank page.
@@ -64,6 +66,7 @@ export function hashFor(route) {
     case 'search': return route.category ? `#/search/${route.category}` : '#/search';
     case 'product': return `#/product/${route.id}`;
     case 'sell-shop': return '#/sell/shop';
+    case 'admin-products': return '#/admin/products';
     case 'sell-new': return '#/sell/new';
     case 'sell-edit': return `#/sell/edit/${route.id}`;
     default: return `#/${route.screen}`;

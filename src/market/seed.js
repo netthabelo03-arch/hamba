@@ -19,20 +19,20 @@ export const SAMPLE_SHOPS = [
   { id: 'shop-weave', owner_id: 'sample', name: 'Ilala Weave', about: 'Woven ilala palm baskets and homeware from KwaZulu-Natal.', city: 'Eshowe', phone: '+27821110004', status: 'approved', created_at: '2026-11-04T08:00:00Z' },
 ];
 
-const P = (id, shop_id, title, category, rands, stock, photo, day, description) => ({
-  id, shop_id, title, category, price_cents: rands * 100, stock, photos: [photo], hidden: false,
+const P = (id, shop_id, title, [category, subcategory, audience], rands, stock, photo, day, description) => ({
+  id, shop_id, title, category, subcategory, audience, status: 'approved', price_cents: rands * 100, stock, photos: [photo], hidden: false,
   created_at: `2026-11-${String(day).padStart(2, '0')}T09:00:00Z`, description,
 });
 
 export const SAMPLE_PRODUCTS = [
-  P('p-runner', 'shop-kasi', 'Township Runner', 'sneakers', 899, 6, SHOE('#1f1f1f', '#ff2e88'), 22, 'Black runner with a pink stripe. Sizes 4 to 11. Cushioned sole for tar and gravel.'),
-  P('p-white', 'shop-kasi', 'Vilakazi Low, white', 'sneakers', 1199, 3, SHOE('#f2f2f2', '#0d0d0d'), 19, 'Clean white leather low-top. Sizes 5 to 10.'),
-  P('p-slides', 'shop-kasi', 'Kasi slides', 'sneakers', 249, 12, SHOE('#ff2e88', '#0d0d0d'), 12, 'Pink pool slides with a soft footbed. Sizes 4 to 12.'),
-  P('p-tee', 'shop-runjozi', 'Quick-dry running tee', 'sport', 329, 20, TEE('#1f1f1f', '#ff2e88'), 21, 'Light, quick-dry tee for hot Joburg runs. S to XXL.'),
-  P('p-tee-pink', 'shop-runjozi', 'Night run tee, reflective', 'sport', 389, 0, TEE('#ff2e88', '#f2f2f2'), 15, 'Pink tee with reflective print for early-morning runs. Back in stock soon.'),
-  P('p-cap', 'shop-runjozi', 'Run Jozi cap', 'fashion', 199, 15, CAP('#1f1f1f', '#ff2e88'), 18, 'Breathable running cap, one size, adjustable.'),
-  P('p-shea', 'shop-glow', 'Whipped shea butter', 'beauty', 145, 30, JAR('#f6e7d0', '#ff2e88'), 20, '250 ml whipped shea butter with coconut oil. For skin and hair.'),
-  P('p-oil', 'shop-glow', 'Marula body oil', 'beauty', 185, 8, JAR('#e8c36a', '#1f1f1f'), 14, '100 ml cold-pressed marula oil.'),
-  P('p-basket', 'shop-weave', 'Ilala palm basket', 'home', 450, 4, BASKET('#d9b36c', '#ff2e88'), 17, 'Hand-woven ilala palm basket, about 30 cm wide. Each one is different.'),
-  P('p-bowl', 'shop-weave', 'Woven fruit bowl', 'crafts', 320, 2, BASKET('#c99b52', '#1f1f1f'), 10, 'Small woven bowl, about 22 cm wide.'),
+  P('p-runner', 'shop-kasi', 'Township Runner', ['shoes', 'Sneakers', 'unisex'], 899, 6, SHOE('#1f1f1f', '#ff2e88'), 22, 'Black runner with a pink stripe. Sizes 4 to 11. Cushioned sole for tar and gravel.'),
+  P('p-white', 'shop-kasi', 'Vilakazi Low, white', ['shoes', 'Sneakers', 'unisex'], 1199, 3, SHOE('#f2f2f2', '#0d0d0d'), 19, 'Clean white leather low-top. Sizes 5 to 10.'),
+  P('p-slides', 'shop-kasi', 'Kasi slides', ['shoes', 'Sandals & slides', 'unisex'], 249, 12, SHOE('#ff2e88', '#0d0d0d'), 12, 'Pink pool slides with a soft footbed. Sizes 4 to 12.'),
+  P('p-tee', 'shop-runjozi', 'Quick-dry running tee', ['sport', 'Running gear', 'unisex'], 329, 20, TEE('#1f1f1f', '#ff2e88'), 21, 'Light, quick-dry tee for hot Joburg runs. S to XXL.'),
+  P('p-tee-pink', 'shop-runjozi', 'Night run tee, reflective', ['sport', 'Reflective & safety gear', 'women'], 389, 0, TEE('#ff2e88', '#f2f2f2'), 15, 'Pink tee with reflective print for early-morning runs. Back in stock soon.'),
+  P('p-cap', 'shop-runjozi', 'Run Jozi cap', ['bags', 'Caps & hats', 'unisex'], 199, 15, CAP('#1f1f1f', '#ff2e88'), 18, 'Breathable running cap, one size, adjustable.'),
+  P('p-shea', 'shop-glow', 'Whipped shea butter', ['beauty', 'Body care', 'unisex'], 145, 30, JAR('#f6e7d0', '#ff2e88'), 20, '250 ml whipped shea butter with coconut oil. For skin and hair.'),
+  P('p-oil', 'shop-glow', 'Marula body oil', ['beauty', 'Body care', 'women'], 185, 8, JAR('#e8c36a', '#1f1f1f'), 14, '100 ml cold-pressed marula oil.'),
+  P('p-basket', 'shop-weave', 'Ilala palm basket', ['home', 'Baskets & storage', null], 450, 4, BASKET('#d9b36c', '#ff2e88'), 17, 'Hand-woven ilala palm basket, about 30 cm wide. Each one is different.'),
+  P('p-bowl', 'shop-weave', 'Woven fruit bowl', ['crafts', 'Weaving', null], 320, 2, BASKET('#c99b52', '#1f1f1f'), 10, 'Small woven bowl, about 22 cm wide.'),
 ];

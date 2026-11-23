@@ -30,11 +30,11 @@ const shopA = { id: 'a', name: 'Kasi Kicks', city: 'Soweto', status: 'approved' 
 const shopB = { id: 'b', name: 'Run Jozi', city: 'Johannesburg', status: 'approved' };
 const pending = { id: 'p', name: 'New Shop', status: 'pending' };
 const products = [
-  { id: '1', title: 'Township Runner', description: 'Black running shoe', category: 'sneakers', price_cents: 89900, stock: 5, hidden: false, created_at: '2026-11-20', shop: shopA },
-  { id: '2', title: 'Quick-dry tee', description: 'Running tee', category: 'sport', price_cents: 32900, stock: 0, hidden: false, created_at: '2026-11-22', shop: shopB },
-  { id: '3', title: 'Hidden cap', description: 'Cap', category: 'fashion', price_cents: 19900, stock: 3, hidden: true, created_at: '2026-11-23', shop: shopB },
-  { id: '4', title: 'Pending sneaker', description: 'Shoe', category: 'sneakers', price_cents: 50000, stock: 3, hidden: false, created_at: '2026-11-23', shop: pending },
-  { id: '5', title: 'Soweto slides', description: 'Pool slides', category: 'sneakers', price_cents: 24900, stock: 2, hidden: false, created_at: '2026-11-21', shop: shopA },
+  { id: '1', title: 'Township Runner', description: 'Black running shoe', category: 'shoes', subcategory: 'Sneakers', audience: 'unisex', price_cents: 89900, stock: 5, hidden: false, created_at: '2026-11-20', shop: shopA },
+  { id: '2', title: 'Quick-dry tee', description: 'Running tee', category: 'sport', subcategory: 'Running gear', audience: 'women', price_cents: 32900, stock: 0, hidden: false, created_at: '2026-11-22', shop: shopB },
+  { id: '3', title: 'Hidden cap', description: 'Cap', category: 'bags', subcategory: 'Caps & hats', price_cents: 19900, stock: 3, hidden: true, created_at: '2026-11-23', shop: shopB },
+  { id: '4', title: 'Pending sneaker', description: 'Shoe', category: 'shoes', subcategory: 'Sneakers', price_cents: 50000, stock: 3, hidden: false, created_at: '2026-11-23', shop: pending },
+  { id: '5', title: 'Soweto slides', description: 'Pool slides', category: 'shoes', subcategory: 'Sandals & slides', audience: 'men', price_cents: 24900, stock: 2, hidden: false, created_at: '2026-11-21', shop: shopA },
 ];
 
 test('hidden products and pending shops never show', () => {
@@ -44,14 +44,18 @@ test('hidden products and pending shops never show', () => {
 test('search, category, price range and sorting all apply', () => {
   assert.deepEqual(filterProducts(products, { q: 'running' }).map((p) => p.id), ['2', '1']);
   assert.deepEqual(filterProducts(products, { q: 'soweto' }).map((p) => p.id), ['5', '1']);
-  assert.deepEqual(filterProducts(products, { category: 'sneakers', sort: 'price-low' }).map((p) => p.id), ['5', '1']);
+  assert.deepEqual(filterProducts(products, { category: 'shoes', sort: 'price-low' }).map((p) => p.id), ['5', '1']);
+  assert.deepEqual(filterProducts(products, { category: 'shoes', type: 'Sneakers' }).map((p) => p.id), ['1']);
+  assert.deepEqual(filterProducts(products, { audience: 'men' }).map((p) => p.id), ['5', '1'], 'unisex shows for men');
+  assert.deepEqual(filterProducts(products, { q: 'slides' }).map((p) => p.id), ['5'], 'the type is searched too');
   assert.deepEqual(filterProducts(products, { min: 30000, sort: 'price-high' }).map((p) => p.id), ['1', '2']);
-  assert.deepEqual(cleanFilters({ min: 500, max: 100, category: 'cars', sort: 'x' }), { q: '', category: '', min: 100, max: 500, sort: 'new' });
-  assert.equal(CATEGORIES.length, 6);
+  assert.deepEqual(cleanFilters({ min: 500, max: 100, category: 'cars', type: 'Sneakers', sort: 'x' }), { q: '', category: '', type: '', audience: '', min: 100, max: 500, sort: 'new' });
+  assert.ok(CATEGORIES.length >= 12);
+  assert.equal(CATEGORIES.at(-1).id, 'other');
 });
 
 test('an empty result explains what to try', () => {
-  assert.match(noResultsMessage({ q: 'boat', category: 'beauty' }), /"boat", Beauty/);
+  assert.match(noResultsMessage({ q: 'boat', category: 'beauty' }), /"boat", Beauty & care/);
   assert.match(noResultsMessage({}), /No products yet/);
 });
 
@@ -111,14 +115,16 @@ test('shop details are checked', () => {
 });
 
 test('product price and stock are checked', () => {
-  const good = checkProduct({ title: 'Township Runner', description: 'Sizes 5 to 11, black and pink.', category: 'sneakers', price: '899', stock: '12' });
+  const good = checkProduct({ title: 'Township Runner', description: 'Sizes 5 to 11, black and pink.', category: 'shoes', type: 'Sneakers', audience: 'unisex', price: '899', stock: '12' });
   assert.equal(good.ok, true);
+  assert.equal(good.value.subcategory, 'Sneakers');
   assert.equal(good.value.price_cents, 89900);
   assert.equal(good.value.stock, 12);
   const bad = checkProduct({ title: 'X', description: '', category: 'cars', price: '2', stock: '-1' });
   assert.deepEqual(Object.keys(bad.errors).sort(), ['category', 'description', 'price', 'stock', 'title']);
+  assert.ok(checkProduct({ ...good.value, title: 'Shoe', description: 'A nice shoe for you', category: 'shoes', type: '', price: '10', stock: '1' }).errors.type);
   assert.match(checkProduct({ ...good.value, title: 'Shoe', description: 'A nice shoe for you', price: 'abc', stock: '1.5' }).errors.price, /in rand/);
-  assert.equal(checkProduct({ title: 'Shoe', description: 'A nice shoe for you', category: 'sneakers', price: '10', stock: '0' }).ok, true);
+  assert.equal(checkProduct({ title: 'Shoe', description: 'A nice shoe for you', category: 'shoes', type: 'Boots', price: '10', stock: '0' }).ok, true);
 });
 
 test('only JPG, PNG and WebP photos up to 8 MB are accepted', () => {
@@ -135,4 +141,14 @@ test('every delivery field is required', () => {
   const empty = checkDelivery({});
   assert.deepEqual(Object.keys(empty.errors).sort(), ['city', 'name', 'phone', 'postalCode', 'province', 'street', 'suburb']);
   assert.ok(checkDelivery({ ...good, postalCode: '18044' }).errors.postalCode);
+});
+
+test('sellers are never boxed in: "Something else" takes their own words', () => {
+  const base = { title: 'Beaded keyring', description: 'Hand-beaded keyring in Ndebele colours.', price: '60', stock: '30' };
+  const own = checkProduct({ ...base, category: 'other', ownType: 'Keyrings' });
+  assert.equal(own.ok, true);
+  assert.deepEqual([own.value.category, own.value.subcategory], ['other', 'Keyrings']);
+  const inDept = checkProduct({ ...base, category: 'jewellery', type: 'other', ownType: 'Keyrings' });
+  assert.deepEqual([inDept.value.category, inDept.value.subcategory], ['jewellery', 'Keyrings']);
+  assert.ok(checkProduct({ ...base, category: 'other', ownType: '' }).errors.ownType);
 });

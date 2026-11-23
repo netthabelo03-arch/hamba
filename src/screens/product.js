@@ -3,7 +3,8 @@
 import { getProduct } from '../market/api.js';
 import { addToBag, readBag, writeBag, MAX_PER_ITEM } from '../market/bag.js';
 import { formatRand, DELIVERY_FEE_CENTS } from '../market/money.js';
-import { categoryName } from '../market/catalog.js';
+import { categoryLabel } from '../market/catalog.js';
+import { PRODUCT_STATUS } from '../market/review.js';
 import { productPhoto, stepper } from '../market/ui.js';
 import { loadViewer } from '../viewer.js';
 import { topBar, tabBar } from '../shell.js';
@@ -62,7 +63,8 @@ export async function renderProduct({ session, route }) {
     el('div', { class: 'stack' }, [
       ...(product.hidden ? [el('p', { class: 'notice', text: 'Hidden: only you can see this product.' })] : []),
       ...(product.shop?.status !== 'approved' ? [el('p', { class: 'notice', text: 'Your shop is not approved yet, so shoppers cannot see this.' })] : []),
-      el('p', { class: 'eyebrow', text: categoryName(product.category) }),
+      ...(own && product.status && product.status !== 'approved' ? [el('p', { class: 'notice', text: `${PRODUCT_STATUS[product.status].tag}${product.status === 'rejected' && product.review_note ? `: ${product.review_note}` : ''}. ${PRODUCT_STATUS[product.status].about}` })] : []),
+      el('p', { class: 'eyebrow', text: categoryLabel(product) }),
       el('h1', { class: 'title', text: product.title }),
       el('p', { class: 'price', text: formatRand(product.price_cents) }),
       el('p', { class: product.stock === 0 ? 'stock stock--out' : product.stock <= 3 ? 'stock stock--low' : 'stock', text: stockText }),

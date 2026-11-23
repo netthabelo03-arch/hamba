@@ -49,7 +49,7 @@ export async function renderHome({ session }) {
     icon(SEARCH_ICON, 18),
     el('span', { text: 'Search sneakers, beauty, crafts' }),
   ]);
-  const chips = el('div', { class: 'chips' }, CATEGORIES.slice(0, 5).map((c) => el('a', { href: `#/search/${c.id}`, class: 'chip-link', text: c.name })));
+  const chips = el('div', { class: 'chips' }, CATEGORIES.filter((c) => c.id !== 'other').slice(0, 8).map((c) => el('a', { href: `#/search/${c.id}`, class: 'chip-link', text: c.name })));
 
   const cards = el('div', { class: 'feature-cards' }, featureCards().map((card) => el('div', { class: 'feature-card', 'aria-disabled': 'true' }, [
     el('b', { class: 'feature-card__title', text: card.title }),

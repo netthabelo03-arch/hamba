@@ -5,13 +5,16 @@
 
 import { getClient } from '../auth/client.js';
 import { isConfigured, SUPABASE_URL } from '../config.js';
-import { filterProducts, cleanFilters } from './catalog.js';
+import { filterProducts, cleanFilters, isLive } from './catalog.js';
+import { needsReview, canAddProduct } from './review.js';
 import { SAMPLE_SHOPS, SAMPLE_PRODUCTS } from './seed.js';
 import { shrinkPhoto, blobToDataUrl } from './photos.js';
 
 const BUCKET = 'product-photos';
+const CHECKS_BUCKET = 'seller-checks';
+const CHECK_COLUMNS = 'shop_id, owner_id, id_photo, selfie, stock_photo, checklist, call_notes, decided_by, decided_at, documents_deleted_at, created_at';
 const SHOP_COLUMNS = 'id, owner_id, name, about, city, phone, status, created_at';
-const PRODUCT_COLUMNS = `id, shop_id, title, description, category, price_cents, stock, photos, hidden, created_at, shop:shops!inner(${SHOP_COLUMNS})`;
+const PRODUCT_COLUMNS = `id, shop_id, title, description, category, subcategory, audience, status, review_note, price_cents, stock, photos, hidden, created_at, shop:shops!inner(${SHOP_COLUMNS})`;
 
 /** A saved photo path as an address the browser can show. */
 export function photoUrl(path) {
@@ -26,13 +29,16 @@ const supabaseMarket = {
   async listProducts(filters, limit = 60) {
     const f = cleanFilters(filters);
     const client = await getClient();
-    let query = client.from('products').select(PRODUCT_COLUMNS).eq('hidden', false).eq('shop.status', 'approved');
+    let query = client.from('products').select(PRODUCT_COLUMNS).eq('hidden', false).eq('status', 'approved').eq('shop.status', 'approved');
     if (f.category) query = query.eq('category', f.category);
+    if (f.type) query = query.eq('subcategory', f.type);
+    if (f.audience === 'women' || f.audience === 'men') query = query.in('audience', [f.audience, 'unisex']);
+    else if (f.audience) query = query.eq('audience', f.audience);
     if (f.min !== null) query = query.gte('price_cents', f.min);
     if (f.max !== null) query = query.lte('price_cents', f.max);
     for (const word of f.q.split(/\s+/).filter(Boolean)) {
       const safe = word.replace(/[%_,().*\\]/g, '');
-      if (safe) query = query.or(`title.ilike.%${safe}%,description.ilike.%${safe}%`);
+      if (safe) query = query.or(`title.ilike.%${safe}%,description.ilike.%${safe}%,subcategory.ilike.%${safe}%`);
     }
     if (f.sort === 'price-low') query = query.order('price_cents', { ascending: true });
     else if (f.sort === 'price-high') query = query.order('price_cents', { ascending: false });
@@ -80,7 +86,7 @@ const supabaseMarket = {
   },
   async uploadPhoto(shopId, file) {
     const client = await getClient();
-    const blob = await shrinkPhoto(file);
+    const blob = await shrinkPhoto(file); // also accepts an already cropped photo
     const path = `${shopId}/${crypto.randomUUID()}.jpg`;
     const { error } = await client.storage.from(BUCKET).upload(path, blob, { contentType: 'image/jpeg', cacheControl: '31536000' });
     if (error) throw error;
@@ -99,6 +105,64 @@ const supabaseMarket = {
     const client = await getClient();
     const { error } = await client.from('products').update({ hidden }).eq('id', productId);
     if (error) throw error;
+  },
+  async productsToReview() {
+    const client = await getClient();
+    const { data, error } = await client.from('products').select(PRODUCT_COLUMNS).eq('status', 'pending').order('updated_at', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+  async reviewProduct(productId, status, note) {
+    const client = await getClient();
+    const { error } = await client.rpc('review_product', { product_id: productId, new_status: status, note: note ?? '' });
+    if (error) throw error;
+  },
+  async submitChecks(userId, shopId, files) {
+    const client = await getClient();
+    const paths = {};
+    for (const [key, file] of Object.entries(files)) {
+      const blob = await shrinkPhoto(file, 1600, 0.85);
+      const path = `${userId}/${key}-${crypto.randomUUID()}.jpg`;
+      const { error } = await client.storage.from(CHECKS_BUCKET).upload(path, blob, { contentType: 'image/jpeg' });
+      if (error) throw error;
+      paths[key] = path;
+    }
+    const { error } = await client.from('shop_checks').insert({ shop_id: shopId, owner_id: userId, id_photo: paths.idPhoto, selfie: paths.selfie, stock_photo: paths.stockPhoto });
+    if (error) throw error;
+  },
+  async getChecks(shopId) {
+    const client = await getClient();
+    const { data, error } = await client.from('shop_checks').select(CHECK_COLUMNS).eq('shop_id', shopId).maybeSingle();
+    if (error) throw error;
+    if (!data) return null;
+    // Private photos open through short-lived links (10 minutes).
+    const urls = {};
+    for (const key of ['id_photo', 'selfie', 'stock_photo']) {
+      if (!data[key]) continue;
+      const { data: signed } = await client.storage.from(CHECKS_BUCKET).createSignedUrl(data[key], 600);
+      urls[key] = signed?.signedUrl ?? '';
+    }
+    return { ...data, urls };
+  },
+  async saveCheckProgress(shopId, { checklist, callNotes }) {
+    const client = await getClient();
+    const { error } = await client.from('shop_checks').update({ checklist, call_notes: callNotes }).eq('shop_id', shopId);
+    if (error) throw error;
+  },
+  async decideShop(shopId, status, adminId) {
+    const client = await getClient();
+    const checks = await this.getChecks(shopId);
+    const { error } = await client.rpc('set_shop_status', { shop_id: shopId, new_status: status });
+    if (error) throw error;
+    if (checks) {
+      const paths = [checks.id_photo, checks.selfie, checks.stock_photo].filter(Boolean);
+      if (paths.length) {
+        const { error: removeError } = await client.storage.from(CHECKS_BUCKET).remove(paths);
+        if (removeError) throw removeError;
+      }
+      const { error: updateError } = await client.from('shop_checks').update({ id_photo: null, selfie: null, stock_photo: null, decided_by: adminId, decided_at: new Date().toISOString(), documents_deleted_at: new Date().toISOString() }).eq('shop_id', shopId);
+      if (updateError) throw updateError;
+    }
   },
   async allShops() {
     const client = await getClient();
@@ -163,9 +227,6 @@ export function createDemoMarket(store = pickStore()) {
   function withShop(data, product) {
     return product ? { ...product, shop: data.shops.find((s) => s.id === product.shop_id) ?? null } : null;
   }
-  function visible(product) {
-    return product && !product.hidden && product.shop?.status === 'approved';
-  }
   const now = () => new Date().toISOString();
 
   return {
@@ -173,10 +234,10 @@ export function createDemoMarket(store = pickStore()) {
       const data = load();
       return filterProducts(data.products.map((p) => withShop(data, p)), filters).slice(0, limit);
     },
-    async getProduct(id, viewerId = null) {
+    async getProduct(id, viewerId = null, admin = false) {
       const data = load();
       const product = withShop(data, data.products.find((p) => p.id === id));
-      return visible(product) || (product && product.shop?.owner_id === viewerId) ? product : null;
+      return isLive(product) || admin || (product && product.shop?.owner_id === viewerId) ? product : null;
     },
     async getProducts(ids) {
       const data = load();
@@ -214,9 +275,12 @@ export function createDemoMarket(store = pickStore()) {
       if (productId) {
         saved = data.products.find((p) => p.id === productId && p.shop_id === shopId);
         if (!saved) throw { code: 42501 };
+        const review = needsReview(saved, { ...saved, ...product });
         Object.assign(saved, product);
+        if (review) saved.status = 'pending';
       } else {
-        saved = { id: `p-${crypto.randomUUID()}`, shop_id: shopId, hidden: false, created_at: now(), ...product };
+        if (!canAddProduct(data.products.filter((p) => p.shop_id === shopId)).ok) throw { code: 'P0001' };
+        saved = { id: `p-${crypto.randomUUID()}`, shop_id: shopId, hidden: false, created_at: now(), ...product, status: 'pending', review_note: '' };
         data.products.push(saved);
       }
       save(data);
@@ -225,6 +289,41 @@ export function createDemoMarket(store = pickStore()) {
     async setHidden(productId, hidden) {
       const data = load();
       data.products.find((p) => p.id === productId).hidden = hidden;
+      save(data);
+    },
+    async productsToReview() {
+      const data = load();
+      return data.products.filter((p) => p.status === 'pending').map((p) => withShop(data, p));
+    },
+    async reviewProduct(productId, status, note) {
+      if (status === 'rejected' && String(note ?? '').trim().length < 5) throw { code: '22023' };
+      const data = load();
+      const product = data.products.find((p) => p.id === productId);
+      product.status = status;
+      product.review_note = status === 'rejected' ? String(note).trim() : '';
+      save(data);
+    },
+    async submitChecks(userId, shopId, files) {
+      const data = load();
+      const urls = {};
+      for (const [key, file] of Object.entries(files)) urls[key] = await blobToDataUrl(await shrinkPhoto(file, 480, 0.6));
+      data.checks = { ...(data.checks ?? {}), [shopId]: { shop_id: shopId, owner_id: userId, id_photo: urls.idPhoto, selfie: urls.selfie, stock_photo: urls.stockPhoto, checklist: {}, call_notes: '', created_at: now() } };
+      save(data);
+    },
+    async getChecks(shopId) {
+      const checks = load().checks?.[shopId];
+      return checks ? { ...checks, urls: { id_photo: checks.id_photo, selfie: checks.selfie, stock_photo: checks.stock_photo } } : null;
+    },
+    async saveCheckProgress(shopId, { checklist, callNotes }) {
+      const data = load();
+      Object.assign(data.checks[shopId], { checklist, call_notes: callNotes });
+      save(data);
+    },
+    async decideShop(shopId, status, adminId) {
+      const data = load();
+      data.shops.find((s) => s.id === shopId).status = status;
+      const checks = data.checks?.[shopId];
+      if (checks) Object.assign(checks, { id_photo: null, selfie: null, stock_photo: null, decided_by: adminId, decided_at: now(), documents_deleted_at: now() });
       save(data);
     },
     async allShops() {
@@ -255,7 +354,7 @@ function use() {
 }
 
 export const listProducts = (filters, limit) => use().listProducts(filters, limit);
-export const getProduct = (id, viewerId) => use().getProduct(id, viewerId);
+export const getProduct = (id, viewerId, admin) => use().getProduct(id, viewerId, admin);
 /** @returns {Promise<Map<string, object>>} the products by id (missing ones are left out) */
 export async function getProductsById(ids) {
   const list = await use().getProducts([...new Set(ids)]);
@@ -270,5 +369,14 @@ export const saveProduct = (shopId, productId, product) => use().saveProduct(sho
 export const setHidden = (productId, hidden) => use().setHidden(productId, hidden);
 export const allShops = () => use().allShops();
 export const setShopStatus = (shopId, status) => use().setShopStatus(shopId, status);
+export const productsToReview = () => use().productsToReview();
+export const reviewProduct = (productId, status, note) => use().reviewProduct(productId, status, note);
+/** Upload the ID, selfie and stock photos (private: only admins can open them). */
+export const submitChecks = (userId, shopId, files) => use().submitChecks(userId, shopId, files);
+/** The seller's checks with short-lived links to the photos (admins), or null. */
+export const getChecks = (shopId) => use().getChecks(shopId);
+export const saveCheckProgress = (shopId, progress) => use().saveCheckProgress(shopId, progress);
+/** Approve or decline a shop, and delete its ID photos (POPIA). */
+export const decideShop = (shopId, status, adminId) => use().decideShop(shopId, status, adminId);
 export const getDelivery = (userId) => use().getDelivery(userId);
 export const saveDelivery = (userId, delivery) => use().saveDelivery(userId, delivery);

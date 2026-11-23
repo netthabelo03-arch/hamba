@@ -2,6 +2,7 @@
 // Items from several shops can share one bag; each shop charges delivery once.
 
 import { DELIVERY_FEE_CENTS } from './money.js';
+import { isLive } from './catalog.js';
 
 const KEY = 'hamba.bag.v1';
 export const MAX_PER_ITEM = 10;
@@ -69,7 +70,7 @@ export function priceBag(items, products) {
   const problems = [];
   for (const item of items) {
     const product = products.get(item.productId);
-    if (!product || product.hidden || product.shop?.status !== 'approved') {
+    if (!isLive(product)) {
       problems.push({ productId: item.productId, reason: 'gone', text: 'No longer available' });
       continue;
     }

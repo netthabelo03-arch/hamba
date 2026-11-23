@@ -1,7 +1,7 @@
 // Checks on shops, products, photos and delivery details.
 // Each returns { ok, errors, value } where value is the tidied version to save.
 
-import { isCategory } from './catalog.js';
+import { isCategory, typesFor, isAudience, OTHER } from './catalog.js';
 import { parseRand } from './money.js';
 import { normalizePhone } from '../auth/validate.js';
 
@@ -31,15 +31,21 @@ export function checkShop({ name, about, city, phone }) {
   return result(errors, value);
 }
 
-export function checkProduct({ title, description, category, price, stock }) {
+/** "type" is one of the department's types, or OTHER with the seller's own words in "ownType". */
+export function checkProduct({ title, description, category, type = '', ownType = '', audience = '', price, stock }) {
   const errors = {};
   const priceCents = parseRand(price);
   const stockText = String(stock ?? '').trim();
   const stockCount = /^\d+$/.test(stockText) ? Number(stockText) : null;
-  const value = { title: text(title), description: String(description ?? '').trim(), category, price_cents: priceCents, stock: stockCount };
+  const typed = text(ownType);
+  const usesOwn = category === OTHER || type === OTHER;
+  const subcategory = usesOwn ? typed : (typesFor(category).includes(type) ? type : '');
+  const value = { title: text(title), description: String(description ?? '').trim(), category, subcategory, audience: isAudience(audience) ? audience : null, price_cents: priceCents, stock: stockCount };
   if (value.title.length < 3 || value.title.length > 80) errors.title = 'Use a name of 3 to 80 characters.';
   if (value.description.length < 10 || value.description.length > 1000) errors.description = 'Describe it in 10 to 1000 characters: sizes, colours, materials.';
   if (!isCategory(category)) errors.category = 'Choose a category.';
+  else if (usesOwn && (typed.length < 2 || typed.length > 40)) errors.ownType = 'Say what kind of product it is, in 2 to 40 characters (e.g. "Beaded keyrings").';
+  else if (!usesOwn && !subcategory) errors.type = 'Choose a type, or "Something else" to type your own.';
   if (priceCents === null) errors.price = 'Enter a price in rand, like 899 or 899.50.';
   else if (priceCents < 500) errors.price = 'The lowest price is R5.00.';
   else if (priceCents > MAX_PRICE_CENTS) errors.price = 'The highest price is R100 000.';
@@ -67,4 +73,18 @@ export function checkDelivery({ name, phone, street, suburb, city, postalCode, p
   if (!/^\d{4}$/.test(value.postal_code)) errors.postalCode = 'Enter the 4-digit postal code.';
   if (!PROVINCES.includes(province)) errors.province = 'Choose the province.';
   return result(errors, value);
+}
+
+/** The shop application's three photos: ID, a selfie holding the ID, and the stock photo. */
+export function checkApplicationPhotos({ idPhoto, selfie, stockPhoto }) {
+  const errors = {};
+  for (const [key, file, missing] of [
+    ['idPhoto', idPhoto, 'Add a photo of your green ID book, ID card or passport.'],
+    ['selfie', selfie, 'Add a selfie of you holding your ID next to your face.'],
+    ['stockPhoto', stockPhoto, 'Add a photo of your products next to a note saying "Hamba" and today\u2019s date.'],
+  ]) {
+    const problem = file ? checkPhotoFile(file) : missing;
+    if (problem) errors[key] = problem;
+  }
+  return { ok: Object.keys(errors).length === 0, errors };
 }

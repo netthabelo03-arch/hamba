@@ -20,7 +20,7 @@ import { renderBag } from './screens/bag.js';
 import { renderCheckout } from './screens/checkout.js';
 import { renderSell, renderSellShop } from './screens/sell.js';
 import { renderProductEdit } from './screens/product-edit.js';
-import { renderAdmin } from './screens/admin.js';
+import { renderAdmin, renderAdminProducts } from './screens/admin.js';
 
 const SCREENS = {
   home: renderHome,
@@ -40,6 +40,7 @@ const SCREENS = {
   'sell-new': renderProductEdit,
   'sell-edit': renderProductEdit,
   admin: renderAdmin,
+  'admin-products': renderAdminProducts,
 };
 
 const root = document.getElementById('app');
