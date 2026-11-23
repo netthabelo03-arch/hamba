@@ -30,8 +30,11 @@ test('a new shop waits for approval and its products stay hidden until then', as
   assert.equal((await market.listProducts({ q: 'venda' })).length, 0, 'the product itself still waits for review');
   await market.reviewProduct(tee.id, 'approved', '');
   assert.equal((await market.listProducts({ q: 'venda' })).length, 1);
-  await market.saveProduct(shop.id, tee.id, { price_cents: 30000, stock: 4 });
-  assert.equal((await market.listProducts({ q: 'venda' })).length, 1, 'a new price does not need review');
+  await market.saveProduct(shop.id, tee.id, { stock: 4 });
+  assert.equal((await market.listProducts({ q: 'venda' })).length, 1, 'new stock does not need review');
+  await market.saveProduct(shop.id, tee.id, { price_cents: 30000 });
+  assert.equal((await market.listProducts({ q: 'venda' })).length, 0, 'a new price goes back for review');
+  await market.reviewProduct(tee.id, 'approved', '');
   await market.saveProduct(shop.id, tee.id, { title: 'Venda print tee, new design' });
   assert.equal((await market.listProducts({ q: 'venda' })).length, 0, 'a new name goes back for review');
   await assert.rejects(market.reviewProduct(tee.id, 'rejected', ''), { code: '22023' });

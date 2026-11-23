@@ -53,8 +53,8 @@ grant insert (subcategory, audience) on public.products to authenticated;
 grant update (subcategory, audience) on public.products to authenticated;
 -- status and review_note are never written by sellers directly.
 
--- New products always start waiting; changing what shoppers read or see sends
--- a product back for review. Price, stock and hiding do not.
+-- New products always start waiting; changing what shoppers read or see, or
+-- the price, sends a product back for review. Stock and hiding do not.
 create or replace function public.products_review_rules()
 returns trigger
 language plpgsql
@@ -69,7 +69,7 @@ begin
     new.review_note := '';
   elsif new.title is distinct from old.title or new.description is distinct from old.description
      or new.category is distinct from old.category or new.subcategory is distinct from old.subcategory
-     or new.photos is distinct from old.photos then
+     or new.photos is distinct from old.photos or new.price_cents is distinct from old.price_cents then
     new.status := 'pending';
   end if;
   return new;

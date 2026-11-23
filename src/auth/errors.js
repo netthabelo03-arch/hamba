@@ -16,7 +16,7 @@ const BY_CODE = {
   session_not_found: 'You have been logged out. Log in again.',
   not_configured: 'Accounts are not switched on yet. Hamba still needs to be connected to its database.',
   42501: 'You are not allowed to do that.',
-  P0001: 'New sellers can list up to 20 products. Hide or remove one, or wait until you have 5 delivered orders.',
+  P0001: 'New sellers can list up to 20 products. Hide or remove one, or wait until you have 2 successful orders.',
   22023: 'Say what the seller must fix (at least a few words).',
   23505: 'You already have one of these. Refresh the page to see it.',
   demo_full: 'This browser has no room left for more demo photos. Use fewer or smaller photos.',

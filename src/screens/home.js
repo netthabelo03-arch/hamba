@@ -11,11 +11,11 @@ import { isDemo } from '../auth/api.js';
 
 const SEARCH_ICON = '<circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path>';
 
-/** The two feature cards under the search box, with when each arrives. */
+/** The two feature cards under the search box. */
 export function featureCards() {
   return [
-    { title: 'Studio', about: 'Vote on member designs', sprint: 3 },
-    { title: 'Run safe', about: 'Crews, safe routes, SOS', sprint: 3 },
+    { title: 'Studio', about: 'Vote on member designs', href: '#/studio' },
+    { title: 'Run safe', about: 'Crews, safe routes, SOS', href: '#/run' },
   ];
 }
 
@@ -51,10 +51,9 @@ export async function renderHome({ session }) {
   ]);
   const chips = el('div', { class: 'chips' }, CATEGORIES.filter((c) => c.id !== 'other').slice(0, 8).map((c) => el('a', { href: `#/search/${c.id}`, class: 'chip-link', text: c.name })));
 
-  const cards = el('div', { class: 'feature-cards' }, featureCards().map((card) => el('div', { class: 'feature-card', 'aria-disabled': 'true' }, [
+  const cards = el('div', { class: 'feature-cards' }, featureCards().map((card) => el('a', { href: card.href, class: 'feature-card' }, [
     el('b', { class: 'feature-card__title', text: card.title }),
     el('span', { class: 'feature-card__about', text: card.about }),
-    el('span', { class: 'soon', text: 'Soon' }),
   ])));
 
   const empty = emptyState(session, profile);

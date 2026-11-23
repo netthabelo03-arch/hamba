@@ -20,7 +20,11 @@ import { renderBag } from './screens/bag.js';
 import { renderCheckout } from './screens/checkout.js';
 import { renderSell, renderSellShop } from './screens/sell.js';
 import { renderProductEdit } from './screens/product-edit.js';
-import { renderAdmin, renderAdminProducts } from './screens/admin.js';
+import { renderAdmin, renderAdminProducts, renderAdminDesigns, renderAdminReports } from './screens/admin.js';
+import { renderStudio, renderStudioNew } from './screens/studio.js';
+import { renderRun, renderRunCrew, renderRunRoute } from './screens/run.js';
+import { renderLive } from './screens/live.js';
+import { renderBuddy } from './screens/buddy.js';
 
 const SCREENS = {
   home: renderHome,
@@ -41,6 +45,15 @@ const SCREENS = {
   'sell-edit': renderProductEdit,
   admin: renderAdmin,
   'admin-products': renderAdminProducts,
+  'admin-designs': renderAdminDesigns,
+  'admin-reports': renderAdminReports,
+  studio: renderStudio,
+  'studio-new': renderStudioNew,
+  run: renderRun,
+  'run-live': renderLive,
+  'run-crew': renderRunCrew,
+  'run-route': renderRunRoute,
+  live: renderBuddy,
 };
 
 const root = document.getElementById('app');
@@ -70,7 +83,7 @@ async function show() {
     }
     return;
   }
-  document.body.classList.toggle('guest-screen', GUEST_SCREENS.includes(route.screen));
+  document.body.classList.toggle('guest-screen', GUEST_SCREENS.includes(route.screen) || ['live', 'run-live'].includes(route.screen));
 
   // A slow screen may finish after the person has moved on: only draw the newest.
   const thisRender = ++latestRender;

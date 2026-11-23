@@ -9,8 +9,8 @@ export const PRODUCT_STATUS = {
   rejected: { tag: 'Not approved', about: 'Fix what the reviewer asked for and save it to send it back.' },
 };
 
-/** Changing these sends a live product back for review; price, stock and hiding do not. */
-export const REVIEWED_FIELDS = ['title', 'description', 'category', 'subcategory', 'photos'];
+/** Changing these sends a live product back for review; stock and hiding do not. */
+export const REVIEWED_FIELDS = ['title', 'description', 'category', 'subcategory', 'photos', 'price_cents'];
 
 export function needsReview(before, after) {
   if (!before) return true;
@@ -55,8 +55,9 @@ export function checklistComplete(checks) {
 export const NEW_SELLER = {
   maxProducts: 20,            // products listed (waiting, live or hidden; not rejected)
   maxSalesCents: 500000,      // R5 000 in sales (applies once payments open)
-  ordersToGraduate: 5,        // delivered orders without complaints
+  ordersToGraduate: 2,        // successful (delivered, no complaint) orders before limits lift and money is released sooner
   trackedCourierOnly: true,   // a tracking number is needed to mark an order shipped (applies once orders open)
+  holdPayoutsUntilGraduated: true, // a new seller's money is released only after their first 2 successful orders
 };
 
 /** Whether a new seller may add another product. */

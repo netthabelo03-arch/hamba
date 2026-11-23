@@ -30,7 +30,7 @@ export async function renderProductEdit({ session, route, navigate }) {
   if (!editing) {
     const room = canAddProduct(await shopProducts(shop.id));
     if (!room.ok) {
-      return [bar, el('h1', { class: 'title', text: 'Product limit reached' }), el('p', { class: 'lead', text: `New sellers can list up to ${NEW_SELLER.maxProducts} products until they have ${NEW_SELLER.ordersToGraduate} delivered orders. Hide or edit an existing product instead.` }), el('a', { href: '#/sell', class: 'button button--primary', text: 'Back to your shop' }), tabBar('sell')];
+      return [bar, el('h1', { class: 'title', text: 'Product limit reached' }), el('p', { class: 'lead', text: `New sellers can list up to ${NEW_SELLER.maxProducts} products until they have ${NEW_SELLER.ordersToGraduate} successful orders. Hide or edit an existing product instead.` }), el('a', { href: '#/sell', class: 'button button--primary', text: 'Back to your shop' }), tabBar('sell')];
     }
   }
 
@@ -157,7 +157,7 @@ export async function renderProductEdit({ session, route, navigate }) {
     fields.price.node,
     fields.stock.node,
     el('label', { class: 'check check--tall', for: 'p-hidden' }, [hidden, el('span', { class: 'check__text' }, [el('span', { class: 'check__label', text: 'Hide from shoppers' }), el('span', { class: 'check__hint', text: 'Keep it in your shop without showing it, for example while you restock.' })])]),
-    el('p', { class: 'field__hint', text: editing ? 'Changing the name, description, category or photos sends the product back for a quick review. Price, stock and hiding change straight away.' : 'Hamba checks every new product before shoppers see it, usually within a day.' }),
+    el('p', { class: 'field__hint', text: editing ? 'Changing the name, description, category, photos or price sends the product back for a quick review. Stock and hiding change straight away.' : 'Hamba checks every new product before shoppers see it, usually within a day.' }),
     message.node,
     save,
   ]);

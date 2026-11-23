@@ -12,11 +12,15 @@ import { isDemo } from '../auth/api.js';
 import { loadViewer } from '../viewer.js';
 import { topBar, tabBar } from '../shell.js';
 import { el, whileBusy, messageBox } from '../dom.js';
+import { designsToReview, reviewDesign, openReports, resolveReport } from '../community/api.js';
+import { VOTE_GOAL, DESIGN_KINDS } from '../community/rules.js';
 
-function tabs(current, counts) {
+function tabs(current, counts = {}) {
   return el('nav', { class: 'chips', 'aria-label': 'Admin' }, [
     ['admin', '#/admin', `Shops${counts.shops ? ` (${counts.shops})` : ''}`],
-    ['admin-products', '#/admin/products', `Products to review${counts.products ? ` (${counts.products})` : ''}`],
+    ['admin-products', '#/admin/products', `Products${counts.products ? ` (${counts.products})` : ''}`],
+    ['admin-designs', '#/admin/designs', 'Designs'],
+    ['admin-reports', '#/admin/reports', 'Reports'],
   ].map(([id, href, text]) => {
     const link = el('a', { href, class: 'chip-link', text });
     if (id === current) link.setAttribute('aria-current', 'true');
@@ -217,4 +221,84 @@ export async function renderAdminProducts({ session }) {
 
   await draw();
   return [bar, el('h1', { class: 'title', text: 'Admin' }), head, body, tabBar('profile')];
+}
+
+// ---------------------------------------------------------------- Studio designs
+
+function designReviewCard(design, redraw) {
+  const note = el('textarea', { id: `${design.id}-note`, class: 'input input--area', rows: '2', placeholder: 'If rejecting: what must the designer fix?' });
+  const message = messageBox();
+  const actions = [];
+  const act = (text, status, primary, needsNote = false) => {
+    const button = el('button', { type: 'button', class: primary ? 'button button--primary button--small' : 'button button--quiet button--small', text });
+    button.addEventListener('click', () => whileBusy(button, '…', async () => {
+      if (needsNote && note.value.trim().length < 5) { message.show('Say what the designer must fix.'); note.focus(); return; }
+      try { await reviewDesign(design.id, status, note.value.trim()); await redraw(); } catch (error) { message.show(friendlyAuthError(error)); }
+    }));
+    actions.push(button);
+  };
+  if (design.status === 'pending') { act('Open for votes', 'open', true); act('Reject', 'rejected', false, true); }
+  else { act('Mark as made', 'made', design.votes >= VOTE_GOAL); act('Close voting', 'rejected', false, true); }
+  const kind = DESIGN_KINDS.find((k) => k.id === design.kind)?.name ?? '';
+  return el('div', { class: 'admin-shop' }, [
+    el('img', { class: 'design__image design__image--large', src: design.image, alt: design.title }),
+    el('b', { class: 'admin-shop__name', text: design.title }),
+    el('span', { class: 'line__meta', text: `${kind} · by ${design.designer_name} · ${design.status === 'pending' ? 'waiting for review' : `${design.votes} of ${VOTE_GOAL} votes`}` }),
+    ...(design.status === 'open' && design.votes >= VOTE_GOAL ? [el('p', { class: 'message message--success', text: 'Reached the goal. Arrange production with a seller, list it, then mark it as made. The designer earns 5% of each sale.' })] : []),
+    el('p', { class: 'body-text', text: design.about }),
+    el('p', { class: 'field__hint', text: 'Check it is original: no copied logos or artwork from other brands.' }),
+    note,
+    message.node,
+    el('div', { class: 'line__actions' }, actions),
+  ]);
+}
+
+export async function renderAdminDesigns({ session }) {
+  const { profile, admin } = await loadViewer(session);
+  const bar = topBar({ profile, session });
+  if (!admin) return locked(bar);
+  const body = el('div', { class: 'stack stack--wide' });
+  async function draw() {
+    const designs = await designsToReview();
+    const pending = designs.filter((d) => d.status === 'pending');
+    const open = designs.filter((d) => d.status === 'open').sort((a, b) => b.votes - a.votes);
+    body.replaceChildren(
+      el('h2', { class: 'section-title', text: `Waiting for review (${pending.length})` }),
+      ...(pending.length ? pending.map((d) => designReviewCard(d, draw)) : [el('p', { class: 'lead', text: 'None.' })]),
+      el('h2', { class: 'section-title', text: `Open for votes (${open.length})` }),
+      ...(open.length ? open.map((d) => designReviewCard(d, draw)) : [el('p', { class: 'lead', text: 'None.' })]),
+    );
+  }
+  await draw();
+  return [bar, el('h1', { class: 'title', text: 'Admin' }), tabs('admin-designs'), body, tabBar('profile')];
+}
+
+// ---------------------------------------------------------------- Reports
+
+export async function renderAdminReports({ session }) {
+  const { profile, admin } = await loadViewer(session);
+  const bar = topBar({ profile, session });
+  if (!admin) return locked(bar);
+  const body = el('div', { class: 'stack stack--wide' });
+  const kinds = { design: 'Design', crew: 'Crew', route: 'Route' };
+  async function draw() {
+    const reports = await openReports();
+    body.replaceChildren(...(reports.length ? reports.map((r) => {
+      const hide = el('button', { type: 'button', class: 'button button--primary button--small', text: 'Hide it' });
+      const keep = el('button', { type: 'button', class: 'button button--quiet button--small', text: 'Keep it' });
+      for (const [button, hidden] of [[hide, true], [keep, false]]) {
+        button.addEventListener('click', () => whileBusy(button, '…', async () => {
+          try { await resolveReport(r.kind, r.item_id, hidden); await draw(); } catch (error) { errorAfter(button, error); }
+        }));
+      }
+      return el('div', { class: 'admin-shop' }, [
+        el('b', { class: 'admin-shop__name', text: `${kinds[r.kind]}: ${r.title}` }),
+        el('span', { class: 'line__meta', text: `${r.count} report${r.count === 1 ? '' : 's'}${r.hidden ? ' · hidden automatically after 3 reports' : ''}` }),
+        el('p', { class: 'body-text', text: [...new Set(r.reasons)].join(', ') }),
+        el('div', { class: 'line__actions' }, [hide, keep]),
+      ]);
+    }) : [el('div', { class: 'empty' }, [el('p', { class: 'empty__text', text: 'No reports. Members can report designs, crews and routes; 3 reports hide an item until you decide.' })])]));
+  }
+  await draw();
+  return [bar, el('h1', { class: 'title', text: 'Admin' }), tabs('admin-reports'), body, tabBar('profile')];
 }

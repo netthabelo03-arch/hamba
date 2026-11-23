@@ -183,8 +183,9 @@ export async function renderSell({ session, navigate }) {
       el('li', { text: `Up to ${NEW_SELLER.maxProducts} products (you have ${room.used}).` }),
       el('li', { text: `Up to ${formatRand(NEW_SELLER.maxSalesCents)} in sales (counted once payments open).` }),
       el('li', { text: 'Send every order with a tracked courier and add the tracking number.' }),
+      el('li', { text: `Your money is released after your first ${NEW_SELLER.ordersToGraduate} successful orders (delivered, no complaints).` }),
     ]),
-    el('span', { class: 'field__hint', text: `These lift after ${NEW_SELLER.ordersToGraduate} delivered orders without complaints.` }),
+    el('span', { class: 'field__hint', text: `The limits lift after ${NEW_SELLER.ordersToGraduate} successful orders.` }),
   ]);
 
   return [

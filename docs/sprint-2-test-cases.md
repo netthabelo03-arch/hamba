@@ -23,9 +23,9 @@ Run on a phone in demo mode first, then again after running `supabase/003_trust.
 | S2-17 | Product approval | New products wait | Save a new product | "Waiting for review" on the product and in the seller's list; it does not show in Search, even in a live shop. | |
 | S2-18 | Product approval | Admin approves | Admin; Products to review; Approve | The product shows in Search. | |
 | S2-19 | Product approval | Admin rejects with a reason | Tap Reject with no note, then with a note | No note: "Say what the seller must fix…". With a note: the seller sees "Not approved" and "To fix: …". | |
-| S2-20 | Product approval | Changes that need review | Edit a live product's price or stock | Stays live. | |
-| S2-21 | Product approval | Changes that need review | Edit a live product's name, description, category or photos | Goes back to "Waiting for review" and disappears from Search until approved. | |
+| S2-20 | Product approval | Changes that need review | Edit a live product's stock, or hide and show it | Stays live. | |
+| S2-21 | Product approval | Changes that need review | Edit a live product's name, description, category, photos or price | Goes back to "Waiting for review" and disappears from Search until approved. | |
 | S2-22 | New seller limits | 20 products | As a new seller, add a 21st product (rejected ones do not count) | "Product limit reached"; the Add a product button is replaced by a warning. | |
-| S2-23 | New seller limits | Limits shown | Open Sell | The New seller limits box lists 20 products, R5 000 in sales, tracked courier only, lifting after 5 delivered orders. | |
+| S2-23 | New seller limits | Limits shown | Open Sell | The New seller limits box lists 20 products, R5 000 in sales, tracked courier only, money released after the first 2 successful orders; limits lift after 2 successful orders. | |
 | S2-24 | Supabase | Sellers cannot approve their own products | As a seller, in the browser console, update a product's status to approved | Refused (sellers cannot write the status column). | |
 | S2-25 | Supabase | ID photos are private | As a seller or a shopper, open a seller-checks file address | Refused; only admins can open them, through links that expire after 10 minutes. | |

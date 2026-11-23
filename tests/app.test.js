@@ -27,6 +27,15 @@ test('marketplace addresses carry their category or product id', () => {
     '#/sell/edit/abc-123': { screen: 'sell-edit', id: 'abc-123' },
     '#/admin': { screen: 'admin' },
     '#/admin/products': { screen: 'admin-products' },
+    '#/admin/designs': { screen: 'admin-designs' },
+    '#/admin/reports': { screen: 'admin-reports' },
+    '#/studio': { screen: 'studio' },
+    '#/studio/new': { screen: 'studio-new' },
+    '#/run': { screen: 'run' },
+    '#/run/live': { screen: 'run-live' },
+    '#/run/crew': { screen: 'run-crew' },
+    '#/run/route': { screen: 'run-route' },
+    '#/live/abcdefghijABCDEFGHIJ_-': { screen: 'live', id: 'abcdefghijABCDEFGHIJ_-' },
   };
   for (const [hash, route] of Object.entries(cases)) {
     assert.deepEqual(parseRoute(hash), route, hash);
@@ -36,8 +45,8 @@ test('marketplace addresses carry their category or product id', () => {
 });
 
 test('checkout, selling and admin need an account; browsing and the bag do not', () => {
-  for (const screen of ['checkout', 'sell', 'sell-new', 'sell-edit', 'sell-shop', 'admin', 'admin-products']) assert.deepEqual(resolveRoute({ screen }, false), { screen: 'signin' });
-  for (const screen of ['search', 'product', 'bag']) assert.equal(resolveRoute({ screen }, false).screen, screen);
+  for (const screen of ['checkout', 'sell', 'sell-new', 'sell-edit', 'sell-shop', 'admin', 'admin-products', 'admin-designs', 'admin-reports', 'studio-new', 'run-live', 'run-crew', 'run-route']) assert.deepEqual(resolveRoute({ screen }, false), { screen: 'signin' });
+  for (const screen of ['search', 'product', 'bag', 'studio', 'run', 'live']) assert.equal(resolveRoute({ screen }, false).screen, screen);
   assert.equal(hashFor({ screen: 'home' }), '#/');
 });
 
@@ -67,8 +76,8 @@ test('people are greeted by first name, then email name', () => {
   assert.equal(displayName(null, null), 'there');
 });
 
-test('Home shows Studio and Run safe as coming soon, and the right empty state', () => {
-  assert.deepEqual(featureCards().map((c) => c.title), ['Studio', 'Run safe']);
+test('Home links to Studio and Run safe, and shows the right empty state', () => {
+  assert.deepEqual(featureCards().map((c) => [c.title, c.href]), [['Studio', '#/studio'], ['Run safe', '#/run']]);
   assert.equal(emptyState(null, null).action.href, '#/signup');
   const session = { user: { id: 'u', email: 'a@b.co' } };
   assert.equal(emptyState(session, { role: 'seller' }).action.href, '#/sell');

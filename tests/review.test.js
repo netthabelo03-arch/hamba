@@ -6,10 +6,10 @@ import { categoryLabel, isLive } from '../src/market/catalog.js';
 
 const live = { title: 'Tee', description: 'Cotton tee', category: 'clothing', subcategory: 'Tops & tees', photos: ['a.jpg'], price_cents: 1000, stock: 3, hidden: false };
 
-test('changing what shoppers read or see needs review; price, stock and hiding do not', () => {
+test('changing what shoppers read or see, or the price, needs review; stock and hiding do not', () => {
   assert.equal(needsReview(null, live), true);
-  assert.equal(needsReview(live, { ...live, price_cents: 900, stock: 0, hidden: true }), false);
-  for (const change of [{ title: 'Tee 2' }, { description: 'New' }, { category: 'sport' }, { subcategory: 'Activewear' }, { photos: ['b.jpg'] }, { photos: ['a.jpg', 'b.jpg'] }]) {
+  assert.equal(needsReview(live, { ...live, stock: 0, hidden: true }), false);
+  for (const change of [{ price_cents: 900 }, { title: 'Tee 2' }, { description: 'New' }, { category: 'sport' }, { subcategory: 'Activewear' }, { photos: ['b.jpg'] }, { photos: ['a.jpg', 'b.jpg'] }]) {
     assert.equal(needsReview(live, { ...live, ...change }), true, JSON.stringify(change));
   }
 });
