@@ -8,7 +8,7 @@ Phone-first web app: plain HTML, CSS and JavaScript (no build step), Supabase fo
 
 - **Studio:** members submit designs (picture cropped square, own-work promise), Hamba reviews them, then everyone votes. One vote per member, no voting for your own, take a vote back any time. At 500 votes the design is made and the designer earns 5% of every sale (paid once payments open in Sprint 3).
 - **Run safe:** crews (join and leave, start your own with days, time and pace), routes rated by runners ("Did you feel safe here?", one answer each, the % shows after 3 answers), and an area filter.
-- **Share my run:** a private link for a buddy (Copy or WhatsApp), live location every 15 seconds while the screen is open (the screen stays awake), and SOS: the buddy sees a red alert with 10111, 112 and 10177. Ending deletes the location; shares end by themselves after 6 hours.
+- **Share my run:** a private link for a buddy (Copy or WhatsApp), live location every 15 seconds while the screen is open (the screen stays awake), and SOS: the buddy sees a red alert with 10111, 112 and 10177. Ending deletes the location; shares end by themselves after 4 hours.
 - **Buddy page:** no account needed; latest location, a map, Open in Google Maps, a warning when updates stop, and "This run has ended".
 - **Reports:** designs, crews and routes can be reported; 3 reports hide an item until an admin decides (Admin, Reports).
 - **Admin:** new Designs and Reports tabs.

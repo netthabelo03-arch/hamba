@@ -128,7 +128,7 @@ export const CHECK_EVERY_MS = 10000;
 /** A location older than this is shown as possibly out of date. */
 export const STALE_AFTER_MS = 2 * 60 * 1000;
 /** Shares end by themselves after this long, so a forgotten share does not run forever. */
-export const SHARE_MAX_HOURS = 6;
+export const SHARE_MAX_HOURS = 4;
 
 /** A random, hard-to-guess share code (22 characters, URL safe). */
 export function newShareToken(random = (n) => crypto.getRandomValues(new Uint8Array(n))) {

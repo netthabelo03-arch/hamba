@@ -212,16 +212,16 @@ returns table (runner_name text, lat double precision, lng double precision, acc
 language sql stable security definer set search_path = '' as $$
   select s.runner_name, s.lat, s.lng, s.accuracy, s.sos, s.started_at, s.updated_at
   from public.live_shares s
-  where s.token = share_token and s.started_at > now() - interval '6 hours';
+  where s.token = share_token and s.started_at > now() - interval '4 hours';
 $$;
 revoke all on function public.get_live_share(text) from public;
 grant execute on function public.get_live_share(text) to anon, authenticated;
 
--- Forgotten shares are deleted after 6 hours. Schedule this daily in Supabase
+-- Forgotten shares are deleted after 4 hours. Schedule this daily in Supabase
 -- (Database, Cron) or run it by hand:  select public.delete_old_shares();
 create or replace function public.delete_old_shares()
 returns void language sql security definer set search_path = '' as $$
-  delete from public.live_shares where started_at < now() - interval '6 hours';
+  delete from public.live_shares where started_at < now() - interval '4 hours';
 $$;
 revoke all on function public.delete_old_shares() from public, anon, authenticated;
 

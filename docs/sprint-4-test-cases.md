@@ -23,7 +23,7 @@ Run on two phones (or a phone and a computer) in demo mode first, then again aft
 | S4-17 | SOS | Alert | Tap SOS | Runner sees "SOS is on" with 10111, 112 and 10177. Within 10 seconds the buddy page shows a red "SOS: [Name] needs help" box. "I'm safe" removes it. | |
 | S4-18 | Live share | Signal lost | Runner locks the phone for 3 minutes | Buddy page shows "No update for a while…". | |
 | S4-19 | Live share | End deletes the location | Tap End sharing and delete my location | Within 10 seconds the buddy page says "This run has ended". In Supabase, the live_shares row is gone. | |
-| S4-20 | Live share | Wrong or old link | Open a made-up link, or one older than 6 hours | "This run has ended". | |
+| S4-20 | Live share | Wrong or old link | Open a made-up link, or one older than 4 hours | "This run has ended". | |
 | S4-21 | Reports | Report a design, crew or route | Tap Report, choose a reason, Send report | "Thanks. Hamba will look at it." The same member cannot report the same item twice. | |
 | S4-22 | Reports | Hidden after 3 reports | Report one route from 3 accounts | It disappears from Run safe and shows in Admin, Reports as hidden. | |
 | S4-23 | Admin: reports | Decide | Tap Keep it (or Hide it) | Keep it brings it back; Hide it keeps it hidden. The report leaves the list. | |

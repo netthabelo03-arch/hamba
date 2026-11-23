@@ -65,8 +65,8 @@ test('share links are long random codes; old or ended shares are treated as over
   assert.equal(isStale('2026-11-23T09:57:00Z', now), true);
   assert.equal(isStale('2026-11-23T09:59:00Z', now), false);
   assert.equal(shareEnded(null, now), true);
-  assert.equal(shareEnded({ started_at: '2026-11-23T09:00:00Z' }, now), false);
-  assert.equal(shareEnded({ started_at: '2026-11-23T03:00:00Z' }, now), true, 'ends by itself after 6 hours');
+  assert.equal(shareEnded({ started_at: '2026-11-23T06:30:00Z' }, now), false);
+  assert.equal(shareEnded({ started_at: '2026-11-23T05:59:00Z' }, now), true, 'ends by itself after 4 hours');
   assert.equal(formatCoords(-26.238912, 27.908621), '-26.23891, 27.90862');
   assert.match(mapsLink(-26.2389, 27.9086), /query=-26\.238900,27\.908600$/);
   assert.match(decodeURIComponent(whatsappLink('https://x/#/live/abc', 'Naledi')), /Naledi is sharing.*https:\/\/x\/#\/live\/abc/);

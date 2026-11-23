@@ -36,7 +36,7 @@ export async function renderLive({ session, navigate }) {
         el('li', { text: 'You get a private link to send to a buddy on WhatsApp.' }),
         el('li', { text: 'Your buddy sees where you are, updated every 15 seconds while this screen is open.' }),
         el('li', { text: 'SOS shows your buddy an alert with the emergency numbers.' }),
-        el('li', { text: 'When you end sharing, your location is deleted. Shares end by themselves after 6 hours.' }),
+        el('li', { text: 'When you end sharing, your location is deleted. Shares end by themselves after 4 hours.' }),
       ]),
       message.node,
       start,
