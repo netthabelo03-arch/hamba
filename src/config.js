@@ -6,8 +6,8 @@
 // While they are empty, Hamba runs in demo mode: accounts are kept only in
 // this browser, so every screen can be tried before the database exists.
 
-export const SUPABASE_URL = '';
-export const SUPABASE_PUBLISHABLE_KEY = '';
+export const SUPABASE_URL = 'https://vwwelmakmloiylfevnlv.supabase.co';
+export const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_hXNixZVnTtgzg7vrTon5NQ_s-H6O-Ir';
 
 /** Whether the app has been connected to its Supabase project yet. */
 export function isConfigured() {

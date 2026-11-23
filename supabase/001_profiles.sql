@@ -97,5 +97,7 @@ set search_path = ''
 as $$
   select exists (select 1 from public.admins a where a.user_id = auth.uid());
 $$;
-revoke all on function public.is_admin() from public, anon;
-grant execute on function public.is_admin() to authenticated;
+revoke all on function public.is_admin() from public;
+-- Visitors (anon) may call it too: it answers false for them, and some
+-- policies that visitors pass through ask it.
+grant execute on function public.is_admin() to anon, authenticated;
